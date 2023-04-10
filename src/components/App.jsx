@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Container } from './App.styled';
 import { Searchbar } from './Searchbar/Searchbar';
@@ -9,82 +9,73 @@ import { Loader } from './Loader/Loader';
 
 import { getGallery } from 'services/gallery.services';
 
-export class App extends Component {
-  state = {
-    search: '',
-    isLoading: false,
-    images: [],
-    largeUrl: '',
-    page: 1,
-    error: false,
-    showModal: false,
-  };
+export const App = () => {
+  const [search, setSearch] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [largeUrl, setLargeUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState(null);
 
-  componentDidUpdate(_, prevState) {
-    const prevSearch = prevState.search;
-    const nextSearch = this.state.search;
-
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
-
-    if (prevSearch !== nextSearch) {
-      this.fetchData(nextSearch, 1);
+  useEffect(() => {
+    if (!search) {
+      return;
     }
-    if (prevPage !== nextPage && prevSearch === nextSearch) {
-      this.fetchData(nextSearch, nextPage);
-    }
-  }
+    fetchData(search, page);
+  }, [search, page]);
 
-  fetchData = async (value, page) => {
-    this.setState({ isLoading: true });
+  const fetchData = async (value, page) => {
+    setIsLoading(true);
     try {
       const items = await getGallery(value, page);
-      this.setState(prevState => ({
-        images: [...prevState.images, ...items],
-      }));
+      setImages(prevImages => [...prevImages, ...items]);
     } catch (error) {
-      this.setState({ error: true });
+      setError(true);
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  modalToggle = () => {
-    this.setState(prevState => ({ showModal: !prevState.showModal }));
+  const modalToggle = () => {
+    setShowModal(prevState => !prevState);
   };
 
-  handleSubmit = value => {
-    this.setState({ search: value, page: 1, images: [] });
+  const handleSubmit = value => {
+    if (!value) {
+      return;
+    }
+
+    setSearch(value);
+    setPage(1);
+    setImages([]);
   };
 
-  handleNextPage = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const handleNextPage = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  handelModalOpen = largeUrl => {
-    this.setState({ largeUrl });
-    this.modalToggle();
+  const handelModalOpen = url => {
+    setLargeUrl(url);
+    modalToggle();
   };
 
-  render() {
-    const { isLoading, images, largeUrl, showModal, error } = this.state;
-    return (
-      <Container>
-        <Searchbar onSubmit={this.handleSubmit} />
-        {error && (
-          <p style={{ textAlign: 'center', fontSize: '20px' }}>
-            Server not responding
-          </p>
-        )}
-        {images.length > 0 && (
-          <ImageGallery items={images} onModal={this.handelModalOpen} />
-        )}
-        {isLoading && <Loader />}
-        {!isLoading && images.length > 0 && (
-          <ButtonLoad onClick={this.handleNextPage}>Load more</ButtonLoad>
-        )}
-        {showModal && <Modal url={largeUrl} onClose={this.modalToggle} />}
-      </Container>
-    );
-  }
-}
+  return (
+    <Container>
+      <Searchbar onSubmit={handleSubmit} />
+      {error && (
+        <p style={{ textAlign: 'center', fontSize: '20px' }}>
+          Server not responding
+        </p>
+      )}
+      {images.length > 0 && (
+        <ImageGallery items={images} onModal={handelModalOpen} />
+      )}
+      {isLoading && <Loader />}
+      {!isLoading && images.length > 0 && (
+        <ButtonLoad onClick={handleNextPage}>Load more</ButtonLoad>
+      )}
+      {showModal && <Modal url={largeUrl} onClose={modalToggle} />}
+    </Container>
+  );
+};

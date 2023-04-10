@@ -1,46 +1,40 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { Form, Input, Button, Icon } from './SearchForm.styled';
 
-export class SearchForm extends Component {
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired,
+export const SearchForm = ({ onSubmit }) => {
+  const [value, setValue] = useState('');
+
+  const handleChange = event => {
+    const { value } = event.target;
+    setValue(value);
   };
 
-  state = {
-    value: '',
-  };
-
-  handleChange = event => {
-    const value = event.target.value;
-    this.setState({ value });
-  };
-
-  handleSubmit = event => {
+  const handleSubmit = event => {
     event.preventDefault();
-    const { value } = this.state;
-    this.props.onSubmit(value);
+    onSubmit(value);
   };
 
-  render() {
-    const { value } = this.state;
-    return (
-      <Form onSubmit={this.handleSubmit}>
-        <Button type="submit">
-          <Icon />
-        </Button>
+  return (
+    <Form onSubmit={handleSubmit}>
+      <Button type="submit">
+        <Icon />
+      </Button>
 
-        <Input
-          name="value"
-          value={value}
-          type="text"
-          autocomplete="off"
-          autoFocus
-          placeholder="Search images and photos"
-          onChange={this.handleChange}
-        />
-      </Form>
-    );
-  }
-}
+      <Input
+        name="value"
+        value={value}
+        type="text"
+        autocomplete="off"
+        autoFocus
+        placeholder="Search images and photos"
+        onChange={handleChange}
+      />
+    </Form>
+  );
+};
+
+SearchForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};

@@ -18,8 +18,8 @@ export const Input = styled.input`
   font-size: 20px;
   border: none;
   outline: none;
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: 10px;
+  padding-right: 10px;
   &::placeholder {
     font: inherit;
     font-size: 18px;

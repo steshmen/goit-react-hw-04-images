@@ -1,41 +1,38 @@
-import { Component } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import { Overlay, ModalBox } from './Modal.styled';
 
-export class Modal extends Component {
-  static propTypes = {
-    url: PropTypes.string.isRequired,
-    onClose: PropTypes.func.isRequired,
-  };
+export const Modal = ({ url, onClose }) => {
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyClose);
+    return () => {
+      window.removeEventListener('keydown', handleKeyClose);
+    };
+  });
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyClose);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleKeyClose);
-  }
-
-  handleKeyClose = e => {
+  const handleKeyClose = e => {
     if (e.code === 'Escape') {
-      this.props.onClose();
+      onClose();
     }
   };
 
-  handleClose = e => {
+  const handleClose = e => {
     if (e.target === e.currentTarget) {
-      this.props.onClose();
+      onClose();
     }
   };
-  render() {
-    const { url } = this.props;
-    return (
-      <Overlay className="overlay" onClick={this.handleClose}>
-        <ModalBox className="modal">
-          <img src={url} alt="title" />
-        </ModalBox>
-      </Overlay>
-    );
-  }
-}
+
+  return (
+    <Overlay className="overlay" onClick={handleClose}>
+      <ModalBox className="modal">
+        <img src={url} alt="title" style={{ objectFit: 'cover' }} />
+      </ModalBox>
+    </Overlay>
+  );
+};
+
+Modal.propTypes = {
+  url: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
