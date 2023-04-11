@@ -5,17 +5,17 @@ import { Overlay, ModalBox } from './Modal.styled';
 
 export const Modal = ({ url, onClose }) => {
   useEffect(() => {
+    const handleKeyClose = e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+    };
+
     window.addEventListener('keydown', handleKeyClose);
     return () => {
       window.removeEventListener('keydown', handleKeyClose);
     };
-  });
-
-  const handleKeyClose = e => {
-    if (e.code === 'Escape') {
-      onClose();
-    }
-  };
+  }, [onClose]);
 
   const handleClose = e => {
     if (e.target === e.currentTarget) {
